@@ -1,12 +1,14 @@
-import { AxiosRequestConfig, AxiosPromise } from './types/index'
+import { AxiosRequestConfig, AxiosPromise, AxiosResponse } from './types/index'
 import xhr from './xhr'
 import { buildURL } from '../src/helpers/url'
-import { transformRequest } from '../src/helpers/data'
+import { transformRequest, transformData } from '../src/helpers/data'
 import { processHeaders } from '../src/helpers/headers'
 
 function axios(config: AxiosRequestConfig): AxiosPromise {
   processConfig(config)
-  return xhr(config)
+  return xhr(config).then(res => {
+    return transformResponseData(res)
+  })
 }
 
 function processConfig(config: AxiosRequestConfig): void {
@@ -28,6 +30,11 @@ function transformHeaders(config: AxiosRequestConfig): any {
 function transformRequestData(config: AxiosRequestConfig): string {
   const { data } = config
   return transformRequest(data)
+}
+
+function transformResponseData(res: AxiosResponse): AxiosResponse {
+  res.data = transformData(res.data)
+  return res
 }
 
 export default axios
